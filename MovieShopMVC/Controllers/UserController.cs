@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace MovieShopMVC.Controllers;
 
-public class UserController
+public class UserController : Controller
 {
     
 }

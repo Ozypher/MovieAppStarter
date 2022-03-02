@@ -1,7 +1,12 @@
+using ApplicationCore.Contracts.Services;
+using Infrastructure.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IMovieService,MovieServiceMock>();
+// if controllername == home then for Imovieservice use movieservice
 
 var app = builder.Build();
 
