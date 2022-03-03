@@ -23,4 +23,12 @@ public class MovieRepository : EfRepository<Movie>, IMovieRepository, IMovieServ
     {
         throw new NotImplementedException();
     }
+
+    public override Movie GetById(int id)
+    {
+        // we need to use the include method here
+        var movieDetails = _dbContext.Movies.Include(m => m.Genres).ThenInclude(m => m.Genre).Include(m => m.Trailers)
+            .FirstOrDefault(m => m.Id == id);
+        return movieDetails;
+    }
 }

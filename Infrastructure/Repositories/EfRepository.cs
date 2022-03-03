@@ -12,7 +12,7 @@ public class EfRepository<T>: IRepository<T> where T : class
         _dbContext = dbContext;
     }
     
-    public T GetById(int id)
+    public virtual T GetById(int id)
     {
         throw new NotImplementedException();
     }
