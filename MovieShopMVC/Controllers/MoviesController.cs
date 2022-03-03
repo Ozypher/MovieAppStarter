@@ -11,9 +11,4 @@ public class MoviesController : Controller
     {
         _movieService = movieService;
     }
-
-    public IActionResult Details()
-    {
-        throw new NotImplementedException();
-    }
 }

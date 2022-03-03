@@ -1,5 +1,7 @@
+using ApplicationCore.Contracts.Repositories;
 using ApplicationCore.Contracts.Services;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IMovieService,MovieServiceMock>();
+builder.Services.AddScoped<IMovieService,MovieService>();
+
+builder.Services.AddScoped<IMovieRepository,MovieRepository>();
 // if controllername == home then for Imovieservice use movieservice
 
 //Connection String Injection

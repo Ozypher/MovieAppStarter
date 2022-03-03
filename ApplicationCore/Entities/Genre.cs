@@ -10,4 +10,6 @@ public class Genre
     
     [MaxLength(64)]
     public string Name { get; set; }
+    //nav prop
+    public ICollection<MovieGenre> Movies { get; set; }
 }
