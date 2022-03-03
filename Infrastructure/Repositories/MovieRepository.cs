@@ -11,6 +11,7 @@ public class MovieRepository : EfRepository<Movie>, IMovieRepository, IMovieServ
     public MovieRepository(MovieShopDbContext dbContext) : base(dbContext)
     {
     }
+
     public IEnumerable<Movie> GetTop30RevenueMovies()
     {
         //Get top 30 Movies by Revenue
