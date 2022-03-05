@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,9 @@ namespace Infrastructure.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Purchase> Purchases { get; set; }
+        public DbSet<Favorite> Favorites { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,6 +41,29 @@ namespace Infrastructure.Data
             modelBuilder.Entity<User>(ConfigureUser);
             modelBuilder.Entity<Role>(ConfigureRole);
             modelBuilder.Entity<UserRole>(ConfigureUserRole);
+            modelBuilder.Entity<Review>(ConfigureReview);
+            modelBuilder.Entity<Purchase>(ConfigurePurchase);
+            modelBuilder.Entity<Favorite>(ConfigureFavorite);
+        }
+
+        private void ConfigureFavorite(EntityTypeBuilder<Favorite> obj)
+        {
+            obj.ToTable("Favorite");
+            obj.HasKey(f => f.Id);
+
+            obj.HasOne(f => f.Movie).WithMany(f => f.Favorites).HasForeignKey(f => f.MovieId);
+            obj.HasOne(f => f.User).WithMany(f => f.Favorites).HasForeignKey(f => f.UserId);
+        }
+
+        private void ConfigurePurchase(EntityTypeBuilder<Purchase> obj)
+        {
+            obj.ToTable("Purchase");
+            obj.HasKey(p => p.Id);
+            obj.Property(p => p.TotalPrice).HasPrecision(18, 2);
+            obj.Property(p => p.PurchaseDateTime).HasPrecision(7);
+
+            obj.HasOne(p => p.Movie).WithMany(p => p.Purchases).HasForeignKey(p => p.MovieId);
+            obj.HasOne(p => p.User).WithMany(p => p.Purchases).HasForeignKey(p => p.UserId);
         }
 
         private void ConfigureUser(EntityTypeBuilder<User> builder)
@@ -92,6 +119,15 @@ namespace Infrastructure.Data
             modelBuilder.HasKey(mg => new { mg.MovieId, mg.GenreId });
             modelBuilder.HasOne(m => m.Movie).WithMany(m => m.Genres).HasForeignKey(m => m.MovieId);
             modelBuilder.HasOne(m => m.Genre).WithMany(m => m.Movies).HasForeignKey(m => m.GenreId);
+        }
+        
+        private void ConfigureReview(EntityTypeBuilder<Review> obj)
+        {
+            obj.ToTable("Review");
+            obj.HasKey(r => new {r.MovieId, r.UserId});
+            obj.Property(r => r.Rating).HasPrecision(3, 2);
+            obj.HasOne(r => r.Movie).WithMany(r => r.Reviews).HasForeignKey(r => r.MovieId);
+            obj.HasOne(r => r.User).WithMany(r => r.Reviews).HasForeignKey(r => r.UserId);
         }
 
         private void ConfigureTrailer(EntityTypeBuilder<Trailer> builder)
