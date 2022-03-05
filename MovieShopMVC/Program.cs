@@ -9,15 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IMovieService,MovieService>();
+builder.Services.AddScoped<IMovieService, MovieService>();
+builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 
-builder.Services.AddScoped<IMovieRepository,MovieRepository>();
-// if controllername == home then for Imovieservice use movieservice
+// if conteollername ==home then for IMovieSefvife use MovieSegvie
+// if conterllnam= movies then for IMovieService ise MovieMockSevice
 
-//Connection String Injection
-builder.Services.AddDbContext<MovieShopDbContext>(options =>
+// inject the connection string to our DbContext by reading from appsettings.json file
+builder.Services.AddDbContext<MovieShopDbContext>( options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MovieShopDbConnection"));
+    options.UseSqlServer( builder.Configuration.GetConnectionString("MovieShopDbConnection"));
 });
 
 var app = builder.Build();

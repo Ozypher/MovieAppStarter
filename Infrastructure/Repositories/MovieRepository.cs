@@ -1,12 +1,11 @@
 using ApplicationCore.Contracts.Repositories;
-using ApplicationCore.Contracts.Services;
 using ApplicationCore.Entities;
-using ApplicationCore.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+
 namespace Infrastructure.Repositories;
 
-public class MovieRepository : EfRepository<Movie>, IMovieRepository, IMovieService
+public class MovieRepository : EfRepository<Movie>, IMovieRepository
 {
     public MovieRepository(MovieShopDbContext dbContext) : base(dbContext)
     {
@@ -14,20 +13,21 @@ public class MovieRepository : EfRepository<Movie>, IMovieRepository, IMovieServ
 
     public IEnumerable<Movie> GetTop30RevenueMovies()
     {
-        //Get top 30 Movies by Revenue
+        // get top 30 movies by revenue
         var movies = _dbContext.Movies.OrderByDescending(m => m.Revenue).Take(30);
         return movies;
     }
 
-    public List<MovieCardModel> GetTop30GrossingMovies()
-    {
-        throw new NotImplementedException();
-    }
-
     public override Movie GetById(int id)
     {
-        // we need to use the include method here
-        var movieDetails = _dbContext.Movies.Include(m => m.Genres).ThenInclude(m => m.Genre).Include(m => m.Trailers)
+        // First throw ex if no matches found
+        // FirstOrDefault safest
+        // Single throw ex 0 or more than 1
+        // SingleOrDefault throw ex if more than 1 
+        // we need to use Include method
+        var movieDetails = _dbContext.Movies.Include(m => m.Genres).ThenInclude(m => m.Genre)
+            .Include(m => m.MovieCasts).ThenInclude(m => m.Cast)
+            .Include(m => m.Trailers)
             .FirstOrDefault(m => m.Id == id);
         return movieDetails;
     }
