@@ -2,7 +2,7 @@
 @using ApplicationCore.Entities
 @model ApplicationCore.Models.MovieDetailsModel
 
-<style>
+<style xmlns="http://www.w3.org/1999/html">
     .movieHead{
         background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url("@Model.BackdropUrl");
         background-size: cover;
@@ -30,8 +30,47 @@
         </div>
         <div class="col-1"></div>
         <div class="col-2">
-            <button type="button" class="btn btn-outline-light">REVIEW</button><br/>
-            <button type="button" class="btn btn-light">BUY $@Model.Price</button>
+            <button type="button" data-bs-toggle="modal" data-bs-target="#reviewModal" class="btn btn-outline-light">REVIEW</button><br/>
+            <div class="modal fade text-black" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reviewModalLabel">Review</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Leave a Review here:<br/>
+                            <form>
+                                <input id="reviewRange" name="reviewRange" type="range" value="0" min="0" max="10" oninput="this.nextElementSibling.value = this.value">
+                                <output>0</output>
+                                <textarea id="review" name="review" rows="4" cols="50"></textarea><br>
+                                <input id="submit" type="button" value="Submit">
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" data-bs-toggle="modal" data-bs-target="#purchaseModal" class="btn btn-light">BUY $@Model.Price</button>
+            <div class="modal fade text-black" id="purchaseModal" tabindex="-1" aria-labelledby="purchaseModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="purchaseModalLabel">Purchase Confirmation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to purchase @Model.Title?
+                            <input type="button" id="submitPurchase" name="Submit" value="Purchase">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
