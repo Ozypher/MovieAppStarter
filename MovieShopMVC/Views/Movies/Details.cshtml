@@ -1,7 +1,37 @@
+@using Microsoft.EntityFrameworkCore
+@using ApplicationCore.Entities
 @model ApplicationCore.Models.MovieDetailsModel
-<h2>Movie Details</h2>
 
-<h3> @Model.Title </h3>
-<h6>
-    @Model.Overview
-</h6>
+<style>
+    .movieHead{
+        background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url("@Model.BackdropUrl");
+        background-size: cover;
+    }
+</style>
+<div class="container-fluid movieHead text-white bg-dark">
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-2">
+            <img src="@Model.PosterUrl"alt="@Model.Title" class="img-fluid"/>
+        </div>
+        <div class="col-1"></div>
+        <div class="col-4">
+            <h2>@Model.Title</h2>
+            <p>@Model.Tagline</p>
+            <h6>
+                @Model.RunTime m | @Model.ReleaseDate.Value.Year
+                @foreach (var Genre in @Model.Genres)
+                {
+                    <span class="badge bg-secondary">@Genre.Name</span>
+                }
+            </h6>
+            <h5><span class="badge bg-success">@Model.Rating 8.9</span></h5>
+            <h6>@Model.Overview</h6>
+        </div>
+        <div class="col-1"></div>
+        <div class="col-2">
+            <button type="button" class="btn btn-outline-light">REVIEW</button><br/>
+            <button type="button" class="btn btn-light">BUY $@Model.Price</button>
+        </div>
+    </div>
+</div>
