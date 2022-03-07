@@ -7,6 +7,10 @@
         background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url("@Model.BackdropUrl");
         background-size: cover;
     }
+    .rounded-circle{
+        max-width: 40px ;
+        max-height: 40px;
+    }
 </style>
 <div class="container-fluid movieHead text-white bg-dark">
     <div class="row">
@@ -71,6 +75,46 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<br/>
+<div class="container-fluid movieDetails text-black bg-white">
+    <div class="row">
+        <div class="col-4 movieFacts">
+            <h5>MOVIE FACTS</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Release Date  <span class="badge bg-secondary">@Model.ReleaseDate.Value.ToString("MMMM dd, yyyy")</span></li>
+                <li class="list-group-item">Run Time  <span class="badge bg-secondary">@Model.RunTime m</span></li>
+                <li class="list-group-item">Box Office  <span class="badge bg-secondary">Placeholder</span></li>
+                <li class="list-group-item">Budget  <span class="badge bg-secondary">@Model.Budget.Value.ToString("C")</span></li>
+                <h6>TRAILERS</h6>
+                @foreach (var trailer in @Model.Trailers)
+                {
+                    <li class="list-group-item"><a href="@trailer.TrailerUrl" target="_blank">@trailer.Name</a></li>
+                }
+            </ul>
+        </div>
+        <div class="col-8 castTable">
+            <h5>CAST</h5>
+            <ul class="list-group list-group-flush">
+                @foreach (var cast in @Model.Casts)
+                {
+                    <li class="list-group-item">
+                        <div class="row">
+                        <div class="col-2 profile">
+                            <img src="@cast.ProfilePath" class="rounded-circle" alt="Facial Profile"/>
+                        </div>
+                        <div class="col-5 castName">
+                            @cast.Name
+                        </div>
+                        <div class="col-5 castCharacter">
+                            @cast.Character
+                        </div>
+                        </div>
+                    </li>
+                }
+            </ul>
         </div>
     </div>
 </div>
