@@ -23,12 +23,12 @@ public class CastService : ICastService
             ProfilePath = cast.ProfilePath, TmdbUrl = cast.TmdbUrl
         };
 
-        castDetails.Movies = new List<MovieDetailsModel>();
-        foreach (var movie in castDetails.Movies)
+        castDetails.Movies = new List<MovieModel>();
+        foreach (var movie in cast.MovieCasts)
         {
-            castDetails.Movies.Add(new MovieDetailsModel
+            castDetails.Movies.Add(new MovieModel
             {
-                Id = movie.Id, Title = movie.Title, PosterUrl = movie.PosterUrl
+                Id = movie.MovieId, Title = movie.Movie.Title
             });
         }
 

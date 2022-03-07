@@ -14,8 +14,8 @@ public class CastRepository : EfRepository<Cast>, ICastRepository
 
     public override Cast GetById(int id)
     {
-        var castDetails = _dbContext.Casts.Include(c => c.MovieCasts).
-            ThenInclude(c=>c.Movie).FirstOrDefault(c => c.Id == id);
+        var castDetails = _dbContext.Casts.Include(c => c.MovieCasts).ThenInclude(c => c.Movie)
+            .FirstOrDefault(c => c.Id == id);
         return castDetails;
     }
 
