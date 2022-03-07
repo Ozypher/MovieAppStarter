@@ -13,9 +13,9 @@ public class MovieService : IMovieService
         _movieRepository = movieRepository;
     }
 
-    public List<MovieCardModel> GetTop30GrossingMovies()
+    public async Task< List<MovieCardModel>> GetTop30GrossingMovies()
     {
-        var movies = _movieRepository.GetTop30RevenueMovies();
+        var movies = await _movieRepository.GetTop30RevenueMovies();
         var movieCards = new List<MovieCardModel>();
 
         // mapping entities data in to models data
@@ -28,9 +28,9 @@ public class MovieService : IMovieService
         return movieCards;
     }
 
-    public MovieDetailsModel GetMovieDetails(int id)
+    public async Task< MovieDetailsModel> GetMovieDetails(int id)
     {
-        var movie = _movieRepository.GetById(id);
+        var movie = await _movieRepository.GetById(id);
 
         var movieDetails = new MovieDetailsModel
         {
@@ -63,5 +63,15 @@ public class MovieService : IMovieService
             });
 
         return movieDetails;
+    }
+
+    public async Task<PagedResultSet<MovieCardModel>> GetMoviesByGenrePagination(int genreId, int pageSize = 30, int pageNumber = 1)
+    {
+        var pagedMovies = await _movieRepository.GetMoviesByGenres(genreId, pageSize, pageNumber);
+
+        var movieCards = new List<MovieCardModel>();
+        
+        movieCards.AddRange( pagedMovies.Data.Select(x=>new MovieCardModel{Id = x.Id,PosterUrl = x.PosterUrl,Title = x.Title}));
+        return new PagedResultSet<MovieCardModel>(movieCards, pageNumber, pageSize, pagedMovies.Count);
     }
 }
