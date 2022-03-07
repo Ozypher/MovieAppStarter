@@ -11,6 +11,8 @@
         max-width: 40px ;
         max-height: 40px;
     }
+    a{text-decoration: none;
+    color: black}
 </style>
 <div class="container-fluid movieHead text-white bg-dark">
     <div class="row">
@@ -102,18 +104,19 @@
             <ul class="list-group list-group-flush">
                 @foreach (var cast in @Model.Casts)
                 {
-                    <li class="list-group-item">
+                    <li class="list-group-item"><a href="../../Cast/Details/@cast.Id">
                         <div class="row">
-                        <div class="col-2 profile">
-                            <img src="@cast.ProfilePath" class="rounded-circle" alt="Facial Profile"/>
+                            <div class="col-2 profile">
+                                <img src="@cast.ProfilePath" class="rounded-circle" alt="Facial Profile"/>
+                            </div>
+                            <div class="col-5 castName">
+                                @cast.Name
+                            </div>
+                            <div class="col-5 castCharacter">
+                                @cast.Character
+                            </div>
                         </div>
-                        <div class="col-5 castName">
-                            @cast.Name
-                        </div>
-                        <div class="col-5 castCharacter">
-                            @cast.Character
-                        </div>
-                        </div>
+                        </a>
                     </li>
                 }
             </ul>
