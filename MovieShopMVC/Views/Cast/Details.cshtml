@@ -1,0 +1,10 @@
+@model ApplicationCore.Models.CastDetailsModel
+<h2>Cast Details</h2>
+<img src="@Model.ProfilePath" alt="@Model.Name's Profile"/>
+<h3>@Model.Name</h3>
+<p>@Model.Gender.ToString()</p>
+<p>@Model.TmdbUrl</p>
+@foreach (var movie in @Model.Movies)
+{
+    <p>@movie.Title</p>
+}

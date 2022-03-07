@@ -86,8 +86,10 @@
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">Release Date  <span class="badge bg-secondary">@Model.ReleaseDate.Value.ToString("MMMM dd, yyyy")</span></li>
                 <li class="list-group-item">Run Time  <span class="badge bg-secondary">@Model.RunTime m</span></li>
-                <li class="list-group-item">Box Office  <span class="badge bg-secondary">Placeholder</span></li>
+                <li class="list-group-item">Box Office  <span class="badge bg-secondary">@Model.Revenue.Value.ToString("C")</span></li>
                 <li class="list-group-item">Budget  <span class="badge bg-secondary">@Model.Budget.Value.ToString("C")</span></li>
+                <li class="list-group-item"><a href="@Model.TmdbUrl" target="_blank">TMDB Link</a></li>
+                <li class="list-group-item"><a href="@Model.ImdbUrl" target="_blank">IMDB Link</a></li>
                 <h6>TRAILERS</h6>
                 @foreach (var trailer in @Model.Trailers)
                 {
