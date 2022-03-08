@@ -28,7 +28,7 @@ namespace MovieShopMVC.Controllers
         }
 
         [HttpGet]
-        public IActionResult TopMovies()
+        public async Task<ActionResult> TopMovies()
         {
             // ReSharper disable once Mvc.ViewNotResolved
             return View();
