@@ -1,1 +1,1 @@
-[![Build status](https://dev.azure.com/SherwinOrg/MovieShop/_apis/build/status/MovieShop-ASP.NET%20Core-CI)](https://dev.azure.com/SherwinOrg/MovieShop/_build/latest?definitionId=1)
+[![Build status](https://dev.azure.com/SherwinOrg/MovieShop/_apis/build/status/MovieShop-ASP.NET%20Core-CI)](https://vsrm.dev.azure.com/SherwinOrg/_apis/public/Release/badge/66bdf8e4-9554-40bb-8405-0f67ce88ff04/1/1)
