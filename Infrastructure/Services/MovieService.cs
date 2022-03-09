@@ -71,7 +71,12 @@ public class MovieService : IMovieService
 
         var movieCards = new List<MovieCardModel>();
         
-        movieCards.AddRange( pagedMovies.Data.Select(x=>new MovieCardModel{Id = x.Id,PosterUrl = x.PosterUrl,Title = x.Title}));
+        movieCards.AddRange( pagedMovies.Data.Select(x=>new MovieCardModel
+        {
+            Id = x.Id,
+            PosterUrl = x.PosterUrl,
+            Title = x.Title
+        }));
         return new PagedResultSet<MovieCardModel>(movieCards, pageNumber, pageSize, pagedMovies.Count);
     }
 }

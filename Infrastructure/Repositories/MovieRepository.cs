@@ -31,7 +31,7 @@ public class MovieRepository : EfRepository<Movie>, IMovieRepository
             throw new Exception("No movies found.");
         }
 
-        var movies = await _dbContext.MovieGenres.Where(g => genreId == genreId).Include(g => g.Movie)
+        var movies = await _dbContext.MovieGenres.Where(g => g.GenreId == genreId).Include(g => g.Movie)
             .OrderBy(g => g.MovieId)
             .Select(m=>new Movie
             {
