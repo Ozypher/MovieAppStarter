@@ -13,6 +13,9 @@
     }
     a{text-decoration: none;
     color: black}
+    
+    .badge a{text-decoration: none;
+    color: white;}
 </style>
 <div class="container-fluid movieHead text-white bg-dark">
     <div class="row">
@@ -28,7 +31,7 @@
                 @Model.RunTime m | @Model.ReleaseDate.Value.Year
                 @foreach (var Genre in @Model.Genres)
                 {
-                    <span class="badge bg-secondary">@Genre.Name</span>
+                    <span class="badge bg-secondary"><a href="../genres/@Genre.Id">@Genre.Name</a></span>
                 }
             </h6>
             <h5><span class="badge bg-success">@Model.Rating 8.9</span></h5>
