@@ -33,7 +33,7 @@ public class MovieRepository : EfRepository<Movie>, IMovieRepository
 
         var movies = await _dbContext.MovieGenres.Where(g => g.GenreId == genreId).Include(g => g.Movie)
             .OrderBy(g => g.MovieId)
-            .Select(m=>new Movie
+            .Select(m=>new Movie 
             {
                 Id=m.MovieId, PosterUrl = m.Movie.PosterUrl, Title = m.Movie.Title
             })
