@@ -40,9 +40,15 @@ namespace MovieShopMVC.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
-            var userLogedIn = await _accountService.ValidateUser(model.Email, model.Password);
-            if (userLogedIn)
+            var userLoggedIn = await _accountService.ValidateUser(model.Email, model.Password);
+            if (userLoggedIn)
+            {
+                //create auth cookie and store info
+                //user information is called claims
+                
+                
                 return LocalRedirect("~/");
+            }
             else
             {
                 return View();
