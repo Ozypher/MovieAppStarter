@@ -41,12 +41,12 @@ namespace MovieShopMVC.Controllers
         public async Task<IActionResult> Login(LoginModel model)
         {
             var userLoggedIn = await _accountService.ValidateUser(model.Email, model.Password);
-            if (userLoggedIn)
+            if (userLoggedIn != null)
             {
                 //create auth cookie and store info
                 //user information is called claims
                 
-                
+                //create claim object to store user claims info
                 return LocalRedirect("~/");
             }
             else
