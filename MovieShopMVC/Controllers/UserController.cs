@@ -1,17 +1,25 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using MovieShopMVC.Services;
 
 namespace MovieShopMVC.Controllers;
 
 public class UserController : Controller
 {
+
+    private readonly ICurrentUser _currentUser;
+
+    public UserController(ICurrentUser currentUser)
+    {
+        _currentUser = currentUser;
+    }
     [HttpGet]
     public async Task<IActionResult> Purchases()
     {
         // check if logged in
-        var isAuthenticated = HttpContext.User.Identity.IsAuthenticated;
+        var userAuth = _currentUser.IsAuthenticated;
 
-        if (isAuthenticated)
+        if (userAuth)
         {
             //get the user id from cookies/claims
             var userId = Convert.ToInt32( HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
