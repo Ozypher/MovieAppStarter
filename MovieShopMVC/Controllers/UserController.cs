@@ -22,7 +22,7 @@ public class UserController : Controller
         if (userAuth)
         {
             //get the user id from cookies/claims
-            var userId = Convert.ToInt32( HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var userId = _currentUser.UserId;
             //sent the userid to userservice and retreive the movies
         }
         //get user id
