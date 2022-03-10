@@ -18,6 +18,7 @@ builder.Services.AddScoped<ICastRepository, CastRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 // if conteollername ==home then for IMovieSefvife use MovieSegvie
 // if conterllnam= movies then for IMovieService ise MovieMockSevice
