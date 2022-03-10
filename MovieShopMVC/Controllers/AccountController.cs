@@ -1,5 +1,8 @@
+using System.Security.Claims;
 using ApplicationCore.Contracts.Services;
 using ApplicationCore.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MovieShopMVC.Controllers
@@ -47,6 +50,26 @@ namespace MovieShopMVC.Controllers
                 //user information is called claims
                 
                 //create claim object to store user claims info
+                var claim = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Email, userLoggedIn.Email),
+                    new Claim(ClaimTypes.NameIdentifier, userLoggedIn.Id.ToString()),
+                    new Claim(ClaimTypes.GivenName, userLoggedIn.FirstName),
+                    new Claim(ClaimTypes.Surname, userLoggedIn.LastName),
+                    new Claim(ClaimTypes.DateOfBirth, userLoggedIn.DateOfBirth.ToShortDateString()),
+                    new Claim("FullName", userLoggedIn.FirstName + ","+userLoggedIn.LastName),
+                    new Claim("Language","en")
+                };
+                
+                //ident object
+                var claimsIdentity = new ClaimsIdentity(claim, CookieAuthenticationDefaults.AuthenticationScheme);
+                
+                //Create cookie
+                //Signinasync
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity));
+                
                 return LocalRedirect("~/");
             }
             else
