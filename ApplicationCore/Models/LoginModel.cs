@@ -4,10 +4,11 @@ namespace ApplicationCore.Models;
 
 public class LoginModel
 {
-    [Required(ErrorMessage = "Email needs to be filled in.")]
-    [EmailAddress(ErrorMessage = "Email is in the incorrect format")]
-    [StringLength(50, ErrorMessage = "Email exceeds 50 character limit.")]
+    [Required(ErrorMessage = "Email should not be empty")]
+    [EmailAddress(ErrorMessage = "Email should be in right format")]
+    [StringLength(50, ErrorMessage = "Email cannot exceed 50 characters")]
     public string Email { get; set; }
-    [Required(ErrorMessage = "Password must be filled in.")]
+
+    [Required(ErrorMessage = "Password Name should not be empty!")]
     public string Password { get; set; }
 }

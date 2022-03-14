@@ -1,5 +1,6 @@
 using ApplicationCore.Contracts.Repositories;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
@@ -11,15 +12,15 @@ public class EfRepository<T>: IRepository<T> where T : class
     {
         _dbContext = dbContext;
     }
-    
-    public async virtual Task<T> GetById(int id)
+
+    public virtual async Task<T> GetById(int id)
     {
         throw new NotImplementedException();
     }
 
-    public async Task< IEnumerable<T>> GetAll()
+    public async Task<IEnumerable<T>> GetAll()
     {
-        throw new NotImplementedException();
+        return await _dbContext.Set<T>().ToListAsync();
     }
 
     public async Task<T> Add(T entity)

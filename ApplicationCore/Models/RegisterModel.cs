@@ -5,21 +5,27 @@ namespace ApplicationCore.Models;
 
 public class RegisterModel
 {
-    [Required]
-    [EmailAddress(ErrorMessage = "Email not formatted correctly.")]
-    [StringLength(50,ErrorMessage = "Email cannot exceed 50 characters")]
+    [Required ( ErrorMessage = "Email should not be empty")]
+    [EmailAddress(ErrorMessage ="Email should be in right format")]
+    [StringLength(50, ErrorMessage ="Email cannot exceed 50 characters")]
     public string Email { get; set; }
-    [Required]
-    [StringLength(50,ErrorMessage = "First name cannot exceed 50 characters")]
+
+    [Required(ErrorMessage ="First Name should not be empty!")]
+    [StringLength (50, ErrorMessage = "FirstName cannot exceed 50 characters")]
     public string FirstName { get; set; }
+
+    [Required(ErrorMessage = "Last Name should not be empty!")]
+    [StringLength(50, ErrorMessage = "FirstName cannot exceed 50 characters")]
     public string LastName { get; set; }
-    [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
-        ,ErrorMessage = "Must contain 8 letters one uppercase one lowercase and a special character.")]
+
+    [Required(ErrorMessage = "Password Name should not be empty!")]
+    [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[#$^+=!*()@%&]).{8,}$", ErrorMessage =
+        "Password Should have minimum 8 with at least one upper, lower, number and special character")]
     public string Password { get; set; }
-    
+
+    [Required (ErrorMessage ="Date of Birth should not be empty")]
     // year should not be less than 1900
     // Minimum age should be 15
-    
     [MinimumAllowedYear]
     public DateTime DateOfBirth { get; set; }
 }

@@ -9,11 +9,12 @@ namespace MovieShopMVC.Controllers
     public class HomeController : Controller
     {
         private readonly IMovieService _movieService;
+
         public HomeController(IMovieService movieService)
         {
             _movieService = movieService;
         }
-       
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -28,9 +29,8 @@ namespace MovieShopMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> TopMovies()
+        public IActionResult TopMovies()
         {
-            // ReSharper disable once Mvc.ViewNotResolved
             return View();
         }
 

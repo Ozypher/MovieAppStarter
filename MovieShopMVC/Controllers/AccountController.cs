@@ -11,81 +11,78 @@ namespace MovieShopMVC.Controllers
     {
         private readonly IAccountService _accountService;
 
-        public AccountController(IAccountService accountService)
+    public AccountController(IAccountService accountService)
+    {
+        _accountService = accountService;
+    }
+
+    // account/register => GET
+    [HttpGet]
+    public IActionResult Register()
+    {
+        return View();
+    }
+
+
+    // 
+    [HttpPost]
+    public async Task<IActionResult> Register(RegisterModel model)
+    {
+        // save the password and account info with salt
+        if (ModelState.IsValid)
         {
-            _accountService = accountService;
+            // save the database
+            var user = await _accountService.CreateUser(model);
+            return RedirectToAction("Login");
         }
 
-        // account/register => GET
-        [HttpGet]
-        public IActionResult Register()
+        return View(model);
+    }
+
+    [HttpGet]
+    public IActionResult Login()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginModel model)
+    {
+        if (!ModelState.IsValid) return View();
+        var userLoggedIn = await _accountService.ValidateUser(model.Email, model.Password);
+        if (userLoggedIn != null)
         {
-            return View();
+            // create an authentication cookie and store some claims information in the cookie
+            // user related information
+            // Driving Licence
+            // First Name, Last Name, Date Of Birth, Location
+
+            // create claims object to store user claims information
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.Email, userLoggedIn.Email),
+                new(ClaimTypes.NameIdentifier, userLoggedIn.Id.ToString()),
+                new(ClaimTypes.GivenName, userLoggedIn.FirstName),
+                new(ClaimTypes.Surname, userLoggedIn.LastName),
+                new(ClaimTypes.DateOfBirth, userLoggedIn.DateOfBirth.ToShortDateString()),
+                new("FullName", userLoggedIn.FirstName + "," + userLoggedIn.LastName),
+                new("Language", "en")
+            };
+
+            // identity object
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // create the cookie
+            // SignInAsync
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            return LocalRedirect("~/");
         }
 
-
-        // 
-        [HttpPost]
-        public async Task<IActionResult> Register(RegisterModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                // save the password and account info with salt
-                var user = await _accountService.CreateUser(model);
-                return RedirectToAction("Login");
-            }
-
-            return View(model);
-
-        }
-
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Login(LoginModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-            
-            var userLoggedIn = await _accountService.ValidateUser(model.Email, model.Password);
-            if (userLoggedIn != null)
-            {
-                //create auth cookie and store info
-                //user information is called claims
-                
-                //create claim object to store user claims info
-                var claim = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Email, userLoggedIn.Email),
-                    new Claim(ClaimTypes.NameIdentifier, userLoggedIn.Id.ToString()),
-                    new Claim(ClaimTypes.GivenName, userLoggedIn.FirstName),
-                    new Claim(ClaimTypes.Surname, userLoggedIn.LastName),
-                    new Claim(ClaimTypes.DateOfBirth, userLoggedIn.DateOfBirth.ToShortDateString()),
-                    new Claim("FullName", userLoggedIn.FirstName + ","+userLoggedIn.LastName),
-                    new Claim("Language","en")
-                };
-                
-                //ident object
-                var claimsIdentity = new ClaimsIdentity(claim, CookieAuthenticationDefaults.AuthenticationScheme);
-                
-                //Create cookie
-                //Signinasync
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
-                
-                return LocalRedirect("~/");
-            }
-            else
-            {
-                return View();
-            }
+        return View();
         }
     }
 }

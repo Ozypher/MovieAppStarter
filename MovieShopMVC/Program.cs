@@ -6,6 +6,7 @@ using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using MovieShopMVC.Services;
+using MovieShopMVC.Infra;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,12 +14,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IMovieService, MovieService>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
-builder.Services.AddScoped<ICastService, CastService>();
-builder.Services.AddScoped<ICastRepository, CastRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICastService, CastService>();
+builder.Services.AddScoped<ICastRepository, CastRepository>();
+builder.Services.AddScoped<IGenreService, GenreService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+
+//
+builder.Services.AddHttpContextAccessor();
 
 // if conteollername ==home then for IMovieSefvife use MovieSegvie
 // if conterllnam= movies then for IMovieService ise MovieMockSevice
@@ -29,14 +34,15 @@ builder.Services.AddDbContext<MovieShopDbContext>( options =>
     options.UseSqlServer( builder.Configuration.GetConnectionString("MovieShopDbConnection"));
 });
 
-//inject cookie info
+// inject the authentication cookie information
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(o =>
+    .AddCookie( options =>
     {
-        o.Cookie.Name = "MovieShopAuthCookie";
-        o.ExpireTimeSpan = TimeSpan.FromDays(30);
-        o.LoginPath = "/Account/Login";
-    });
+        options.Cookie.Name = "MovieShopAuthCookie";
+        options.ExpireTimeSpan = TimeSpan.FromDays(1);
+        options.LoginPath = "/Account/Login";
+    } );
+
 
 var app = builder.Build();
 
@@ -48,14 +54,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+//app.UseExceptionHandler("/Home/Error");
+app.UseMovieShopExceptionMiddleware();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-
-
-//before auth
+// before the authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
