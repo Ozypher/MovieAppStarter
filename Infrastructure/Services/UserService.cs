@@ -1,3 +1,4 @@
+using ApplicationCore.Contracts.Repositories;
 using ApplicationCore.Contracts.Services;
 using ApplicationCore.Entities;
 using ApplicationCore.Models;
@@ -7,116 +8,159 @@ namespace Infrastructure.Services;
 
 public class UserService : IUserService
 {
-    private readonly UserRepository _userRepository;
+    private readonly IReviewRepository _reviewRepository;
+    private readonly IPurchaseRepository _purchaseRepository;
+    private readonly IFavoriteRepository _favoriteRepository;
 
-    public UserService(UserRepository userRepository)
+
+    public UserService(IReviewRepository reviewRepository, IPurchaseRepository purchaseRepository, IFavoriteRepository favoriteRepository)
     {
-        _userRepository = userRepository;
+        _reviewRepository = reviewRepository;
+        _purchaseRepository = purchaseRepository;
+        _favoriteRepository = favoriteRepository;
     }
 
-    public async Task PurchaseMovie(PurchaseRequestModel purchaseRequest, int userId)
+    public async Task<int> PurchaseMovie(PurchaseRequestModel purchaseRequest, int userId)
     {
-        var user = await _userRepository.GetById(userId);
-        user.Purchases.Add
-        (new Purchase
+        // check if user already purchased or not
+        var purchasedByUser = await _purchaseRepository.GetPurchaseByUser(purchaseRequest.MovieId, userId);
+        if (purchasedByUser != null)
         {
-            MovieId = purchaseRequest.MovieId, PurchaseNumber = purchaseRequest.PurchaseNumber, TotalPrice = purchaseRequest.TotalMoney, PurchaseDateTime = purchaseRequest.PurchaseDateTime
-        });
+            throw new Exception("Already bought");
+        }
+
+        var newPurchased = new Purchase
+        {
+            UserId = userId,
+            PurchaseDateTime = purchaseRequest.PurchaseDateTime,
+            MovieId = purchaseRequest.MovieId,
+            TotalPrice = purchaseRequest.TotalMoney,
+            PurchaseNumber = purchaseRequest.PurchaseNumber
+        };
+        var createdPurchased = await _purchaseRepository.Add(newPurchased);
+        return createdPurchased.Id;
     }
 
     public async Task<bool> IsMoviePurchased(PurchaseRequestModel purchaseRequest, int userId)
     {
-        var user = await _userRepository.GetById(userId);
-        if (user.Purchases.FirstOrDefault(u => u.MovieId == purchaseRequest.MovieId)!=null)
+        
+        var purchasedByUser = await _purchaseRepository.GetPurchaseByUser(purchaseRequest.MovieId, userId);
+        if (purchasedByUser != null)
         {
             return true;
         }
 
         return false;
-
     }
 
-    public async Task<List<PurchaseRequestModel>> GetAllPurchasesForUser(int id)
+    public async Task<PurchaseModel> GetPurchasesDetails(int userId, int movieId)
     {
-        var user = await _userRepository.GetById(id);
-        List<PurchaseRequestModel> purchases = new List<PurchaseRequestModel>();
-        foreach (var movie in purchases)
+        var purchasedByUser = await _purchaseRepository.GetPurchaseByUser(movieId, userId);
+        if (purchasedByUser == null)
         {
-            purchases.Add(new PurchaseRequestModel
+            return null;
+        }
+        return new PurchaseModel
+        {
+            Id = purchasedByUser.Id,
+            UserId = purchasedByUser.UserId,
+            PurchaseDateTime = purchasedByUser.PurchaseDateTime,
+            TotalPrice = purchasedByUser.TotalPrice,
+            PurchaseNumber = purchasedByUser.PurchaseNumber,
+            Movie = new MovieCardModel
             {
-                MovieId = movie.MovieId, PurchaseNumber = movie.PurchaseNumber, TotalMoney = movie.TotalMoney, PurchaseDateTime = movie.PurchaseDateTime
-            });
-        }
-
-        return purchases;
-
-    }
-
-    public async Task<PurchaseRequestModel> GetPurchasesDetails(int userId, int movieId)
-    {
-        var user = await _userRepository.GetById(userId);
-        var purchase = user.Purchases.FirstOrDefault(u => u.MovieId == movieId);
-        if (purchase.Equals(null))
-        {
-            throw new Exception("User does not have purchase on account.");
-        }
-        else
-        {
-            return new PurchaseRequestModel
-            {
-                MovieId = purchase.MovieId, PurchaseNumber = purchase.PurchaseNumber, TotalMoney = purchase.TotalPrice, PurchaseDateTime = purchase.PurchaseDateTime
-            };
-        }
+                Id = purchasedByUser.Movie.Id,
+                PosterUrl = purchasedByUser.Movie.PosterUrl,
+                Title = purchasedByUser.Movie.Title
+            }
+        };
         
     }
 
-    public async Task<FavoriteRequestModel> AddFavorite(FavoriteRequestModel favoriteRequestModel)
+    public async Task<List<PurchaseModel>> GetAllPurchasesForUser(int id)
     {
-        var user = await _userRepository.GetById(favoriteRequestModel.UserId);
-        if (!FavoriteExists(favoriteRequestModel.UserId,favoriteRequestModel.MovieId).Result)
+        var Purchases = await _purchaseRepository.GetAllPurchasesForUser(id);
+        var ListOfPurchase = new List<PurchaseModel>();
+        foreach (var p in Purchases)
         {
-            user.Favorites.Add(new Favorite
+            var PurchasesDetails = new PurchaseModel
             {
-                MovieId = favoriteRequestModel.MovieId, UserId = user.Id
-            });
-        }
-        else
-        {
-            throw new Exception("Already Favorite");
+                Id = p.Id,
+                UserId = p.UserId,
+                PurchaseDateTime = p.PurchaseDateTime,
+                TotalPrice = p.TotalPrice,
+                PurchaseNumber = p.PurchaseNumber,
+            };
+            PurchasesDetails.Movie = new MovieCardModel
+            {
+                Id = p.MovieId,
+                PosterUrl = p.Movie.PosterUrl,
+                Title = p.Movie.Title
+            };
+
+            ListOfPurchase.Add(PurchasesDetails);
         }
 
-        var favorite = new FavoriteRequestModel
-        {
-            UserId = user.Id, MovieId = favoriteRequestModel.MovieId
-        };
-        return favorite;
+        return ListOfPurchase;
     }
 
-    public async Task<FavoriteRequestModel> RemoveFavorite(FavoriteRequestModel favoriteRequest)
+    public async Task<int> AddFavorite(FavoriteRequestModel model)
     {
-        var user = await _userRepository.GetById(favoriteRequest.UserId);
-        if (!FavoriteExists(favoriteRequest.UserId, favoriteRequest.MovieId).Result)
+        var favorite = await _favoriteRepository.GetFavoriteByUser(model);
+        if (favorite != null)
         {
-            throw new Exception("Not a favorite");
-        }
-        else
-        {
-            user.Favorites.Remove(new Favorite
-            {
-                MovieId = favoriteRequest.MovieId, UserId = favoriteRequest.UserId
-            });
+            throw new Exception("already favorited");
         }
 
-        return new FavoriteRequestModel
+        var createdFavorite = await _favoriteRepository.Add(new Favorite
         {
-            MovieId = favoriteRequest.MovieId, UserId = favoriteRequest.UserId
-        };
+            MovieId = model.MovieId,
+            UserId = model.UserId
+        });
+        return createdFavorite.Id;
+    }
+
+    public async Task<int> RemoveFavorite(FavoriteRequestModel model)
+    {
+        var favorite = await _favoriteRepository.GetFavoriteByUser(model);
+        if (favorite == null)
+        {
+            throw new Exception("not have that favorite");
+        }
+
+        var removedFavorite = await _favoriteRepository.Delete(favorite);
+        return removedFavorite.Id;
+    }
+
+    public async Task<List<FavoriteModel>> GetAllFavoritesForUser(int id)
+    {
+        var favorites = await _favoriteRepository.GetAllFavoriteByUser(id);
+        var newFavorites = new List<FavoriteModel>();
+        foreach (var f in favorites)
+        {
+            newFavorites.Add(new FavoriteModel
+            {
+                Id = f.Id,
+                MovieId = f.MovieId,
+                UserId = f.UserId,
+                Movie = new MovieCardModel
+                {
+                    Id = f.Movie.Id,
+                    PosterUrl = f.Movie.PosterUrl,
+                    Title = f.Movie.Title,
+                }
+            });
+            
+        }
+
+        return newFavorites;
     }
 
     public async Task<bool> FavoriteExists(int id, int movieId)
     {
-        var user = await _userRepository.GetById(id);
-        if (!user.Favorites.FirstOrDefault(x => x.MovieId == movieId).Equals(null))
+        var favorite =
+            await _favoriteRepository.GetFavoriteByUser(new FavoriteRequestModel {MovieId = movieId, UserId = id});
+        if (favorite != null)
         {
             return true;
         }
@@ -124,59 +168,88 @@ public class UserService : IUserService
         return false;
     }
 
-    public async Task<List<FavoriteRequestModel>> GetAllFavoritesForUser(int id)
+    public async Task<ReviewModel> AddMovieReview(ReviewRequestModel reviewRequest)
     {
-        var user = await _userRepository.GetById(id);
-        List<FavoriteRequestModel> returnlist = new List<FavoriteRequestModel>();
-        foreach (var favorite in user.Favorites)
+        var review = await _reviewRepository.GetReviewByUser(reviewRequest.MovieId, reviewRequest.UserId);
+        if (review != null)
         {
-            returnlist.Add(new FavoriteRequestModel{
-                MovieId = favorite.MovieId, UserId = favorite.UserId
-            });
+            throw new Exception("already reviewed");
         }
 
-        return returnlist;
-    }
-
-    public async Task AddMovieReview(ReviewRequestModel reviewRequest)
-    {
-        var user = await _userRepository.GetById(reviewRequest.UserId);
-        user.Reviews.Add(new Review
+        var createdReview = await _reviewRepository.Add(new Review
         {
-            MovieId = reviewRequest.MovieId, UserId = reviewRequest.UserId, Rating = reviewRequest.Rating, ReviewText = reviewRequest.ReviewText
+            MovieId = reviewRequest.MovieId,
+            UserId = reviewRequest.UserId,
+            Rating = reviewRequest.Rating,
+            ReviewText = reviewRequest.ReviewText
         });
-    }
-
-    public async Task UpdateMovieReview(ReviewRequestModel reviewRequest)
-    {
-        var user = await _userRepository.GetById(reviewRequest.UserId);
-        var item = user.Reviews.FirstOrDefault(x => x.MovieId == reviewRequest.MovieId);
-        user.Reviews.Remove(item);
-        user.Reviews.Add(new Review
+        var reviewModel = new ReviewModel
         {
-            MovieId = reviewRequest.MovieId, UserId = reviewRequest.UserId, Rating = reviewRequest.Rating, ReviewText = reviewRequest.ReviewText
-        });
+            Title = createdReview.Movie.Title,
+            PosterURL = createdReview.Movie.PosterUrl,
+            MovieId = createdReview.MovieId,
+            Rating = createdReview.Rating,
+            ReviewText = createdReview.ReviewText,
+            UserId = createdReview.UserId
+        };
+        return reviewModel;
     }
 
-    public async Task DeleteMovieReview(int userId, int movieId)
+    public async Task<string> DeleteMovieReview(int userId, int movieId)
     {
-        var user = await _userRepository.GetById(userId);
-        var item = user.Reviews.FirstOrDefault(x => x.MovieId == movieId);
-        user.Reviews.Remove(item);
-    }
-
-    public async Task<List<ReviewRequestModel>> GetAllReviewsByUser(int id)
-    {
-        var user = await _userRepository.GetById(id);
-        List<ReviewRequestModel> reviewlist = new List<ReviewRequestModel>();
-        foreach (var review in user.Reviews)
+        var review = await _reviewRepository.GetReviewByUser(movieId, userId);
+        if (review == null)
         {
-            reviewlist.Add(new ReviewRequestModel
+            throw new Exception("not reviewed yet");
+        }
+
+        var createdReview = await _reviewRepository.Delete(review);
+        return "deleted";
+    }
+
+    public async Task<List<ReviewModel>> GetAllReviewsByUser(int id)
+    {
+        var reviews = await _reviewRepository.GetAllReviewsByUser(id);
+        var reviewsModel = new List<ReviewModel>();
+        foreach (var review in reviews)
+        {
+            reviewsModel.Add(new ReviewModel
             {
-                MovieId = review.MovieId, Rating = review.Rating, ReviewText = review.ReviewText, UserId = review.UserId
+                MovieId = review.MovieId,
+                PosterURL = review.Movie.PosterUrl,
+                UserId = review.UserId,
+                Rating = review.Rating,
+                ReviewText = review.ReviewText,
+                Title = review.Movie.Title
             });
         }
 
-        return reviewlist;
+        return reviewsModel;
+    }
+
+    public async Task<ReviewModel> UpdateMovieReview(ReviewRequestModel reviewRequest)
+    {
+        var review = await _reviewRepository.GetReviewByUser(reviewRequest.MovieId, reviewRequest.UserId);
+        if (review == null)
+        {
+            throw new Exception("not reviewed yet");
+        }
+
+        var updatedReview = await _reviewRepository.Update(new Review
+        {
+            UserId = reviewRequest.UserId,
+            MovieId = reviewRequest.MovieId,
+            Rating = reviewRequest.Rating,
+            ReviewText = reviewRequest.ReviewText
+        });
+        return new ReviewModel
+        {
+            MovieId = updatedReview.MovieId,
+            Title = updatedReview.Movie.Title,
+            PosterURL = updatedReview.Movie.PosterUrl,
+            Rating = updatedReview.Rating,
+            ReviewText = updatedReview.ReviewText,
+            UserId = updatedReview.UserId,
+        };
     }
 }

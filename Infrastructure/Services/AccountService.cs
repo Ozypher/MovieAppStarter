@@ -21,7 +21,7 @@ namespace Infrastructure.Services
             _userRepository = userRepository;
         }
 
-        public async Task<int> CreateUser(RegisterModel model)
+        public async Task<int> CreateUser(UserRegisterRequestModel model)
         {
             // check whether user has registered with same email
             // go to user repository and get user record from user table by email
@@ -56,15 +56,15 @@ namespace Infrastructure.Services
 
         }
 
-        public async Task<LoginResponseModel> ValidateUser(string email, string password)
+        public async Task<LoginResponseModel> ValidateUser(UserLoginRequestModel model)
         {
-            var user = await _userRepository.GetUserByEmail(email); 
+            var user = await _userRepository.GetUserByEmail(model.Email); 
             if (user == null)
             {
                 throw new Exception("un/pw in valid");
             }
 
-            var hashedPassword = GetHashedPassword(password, user.Salt);
+            var hashedPassword = GetHashedPassword(model.Password, user.Salt);
             if (hashedPassword == user.HashedPassword )
             {
                 return new LoginResponseModel

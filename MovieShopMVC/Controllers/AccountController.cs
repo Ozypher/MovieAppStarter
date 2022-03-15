@@ -11,78 +11,64 @@ namespace MovieShopMVC.Controllers
     {
         private readonly IAccountService _accountService;
 
-    public AccountController(IAccountService accountService)
-    {
-        _accountService = accountService;
-    }
 
-    // account/register => GET
-    [HttpGet]
-    public IActionResult Register()
-    {
-        return View();
-    }
-
-
-    // 
-    [HttpPost]
-    public async Task<IActionResult> Register(RegisterModel model)
-    {
-        // save the password and account info with salt
-        if (ModelState.IsValid)
+        public AccountController(IAccountService accountService)
         {
-            // save the database
+            _accountService = accountService;
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(UserRegisterRequestModel model)
+        {
             var user = await _accountService.CreateUser(model);
             return RedirectToAction("Login");
         }
 
-        return View(model);
-    }
-
-    [HttpGet]
-    public IActionResult Login()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Login(LoginModel model)
-    {
-        if (!ModelState.IsValid) return View();
-        var userLoggedIn = await _accountService.ValidateUser(model.Email, model.Password);
-        if (userLoggedIn != null)
+        [HttpGet]
+        public IActionResult Login()
         {
-            // create an authentication cookie and store some claims information in the cookie
-            // user related information
-            // Driving Licence
-            // First Name, Last Name, Date Of Birth, Location
-
-            // create claims object to store user claims information
-
-            var claims = new List<Claim>
-            {
-                new(ClaimTypes.Email, userLoggedIn.Email),
-                new(ClaimTypes.NameIdentifier, userLoggedIn.Id.ToString()),
-                new(ClaimTypes.GivenName, userLoggedIn.FirstName),
-                new(ClaimTypes.Surname, userLoggedIn.LastName),
-                new(ClaimTypes.DateOfBirth, userLoggedIn.DateOfBirth.ToShortDateString()),
-                new("FullName", userLoggedIn.FirstName + "," + userLoggedIn.LastName),
-                new("Language", "en")
-            };
-
-            // identity object
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            // create the cookie
-            // SignInAsync
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity));
-
-            return LocalRedirect("~/");
+            return View();
         }
 
-        return View();
+        [HttpPost]
+        public async Task<IActionResult> Login(UserLoginRequestModel model)
+        {
+            var user = await _accountService.ValidateUser(model);
+            if (user != null)
+            {
+                // create an authentication cookie and store some claims information in the cookie
+            
+            
+                //1st step create claim object to store user claims info
+                var claim = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.DateOfBirth, user.DateOfBirth.ToShortDateString()),
+                    new Claim(ClaimTypes.Surname, user.LastName),
+                    new Claim(ClaimTypes.GivenName, user.FirstName),
+                    new Claim("Full Name", user.FirstName + " " + user.LastName),
+                    new Claim("Language", "en")
+
+                };
+                // 2nd step identity object. Think as driver license to show all claims.
+                var claimIdentity = new ClaimsIdentity(claim, CookieAuthenticationDefaults.AuthenticationScheme);
+                // 3rd step
+                // create the cookie
+                // SignInAsync
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimIdentity));
+            
+                return LocalRedirect("~/");
+            }
+
+            return View();
         }
     }
 }

@@ -1,37 +1,51 @@
 using ApplicationCore.Contracts.Services;
 using Microsoft.AspNetCore.Mvc;
+using MovieShopMVC.Services;
 
 namespace MovieShopMVC.Controllers
 {
     public class MoviesController : Controller
     {
-        private readonly IMovieService _movieService;
-        public MoviesController(IMovieService movieService)
+        private readonly IMovieService _MovieService;
+        private readonly ICurrentUser _currentUser;
+        private readonly IUserService _userService;
+
+
+        public MoviesController(IMovieService movieService, ICurrentUser currentUser, IUserService userService)
         {
-            _movieService = movieService;
-        }
-
-        public async  Task<IActionResult>  Details(int id)
-        {
-            // Movie Service with Details
-            // pass the movie details data to view
-            // Data
-            // Remote Database 
-
-            // CPU bound operation => PI => Loan callcuator, image pro
-            // I/O bound operation => database calls, file, images, videos
-
-            // Network speed, SQL Server => Query , Server Memory
-            // T1 is just waiting
-            var movieDetails = await _movieService.GetMovieDetails(id);
-            return View(movieDetails);
+            _MovieService = movieService;
+            _currentUser = currentUser;
+            _userService = userService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Genres(int id, int pagesize = 30, int pagenumber = 1)
+        public async Task<IActionResult> Details(int id)
         {
-            var pagedMovies = await _movieService.GetMoviesByGenrePagination(id, pagesize, pagenumber);
-            return View("PagedMovies",pagedMovies);
+            ViewData["isPurchased"] = false;
+            ViewData["isFavorited"] = false;
+            if (_currentUser.IsAuthenticated)
+            {
+                var currentUser = _currentUser.UserId;
+                var getMoviesPurchasesDetails = await _userService.GetPurchasesDetails(currentUser, id);
+                if (getMoviesPurchasesDetails != null)
+                {
+                    ViewData["isPurchased"] = true;
+                }
+
+                var isFavorited = await _userService.FavoriteExists(currentUser, id);
+                if (isFavorited)
+                {
+                    ViewData["isFavorited"] = true;
+                }
+            }
+            var movieDetails = await _MovieService.GetMovieDetails(id);
+            return View(movieDetails);
+        }
+
+        public async Task<IActionResult> Genres(int id, int pageSize = 30, int pageNumber = 1)
+        {
+            var pagedNumbers = await _MovieService.GetMoviesByGenrePagination(id, pageSize, pageNumber);
+            return View("PagedNumbers", pagedNumbers);
         }
     }
 }
