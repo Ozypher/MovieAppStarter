@@ -26,7 +26,6 @@ namespace Infrastructure.Data
         public DbSet<MovieCast> MovieCasts { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
         public DbSet<Favorite> Favorites { get; set; }
@@ -40,7 +39,10 @@ namespace Infrastructure.Data
             modelBuilder.Entity<MovieCast>(ConfigureMovieCast);
             modelBuilder.Entity<User>(ConfigureUser);
             modelBuilder.Entity<Role>(ConfigureRole);
-            modelBuilder.Entity<UserRole>(ConfigureUserRole);
+            modelBuilder.Entity<User>().HasMany(u => u.Roles).WithMany(r => r.Users)
+                .UsingEntity<Dictionary<string, object>>("UserRole",
+                    u => u.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
+                    r => r.HasOne<User>().WithMany().HasForeignKey("UserId"));
             modelBuilder.Entity<Review>(ConfigureReview);
             modelBuilder.Entity<Purchase>(ConfigurePurchase);
             modelBuilder.Entity<Favorite>(ConfigureFavorite);
@@ -85,14 +87,6 @@ namespace Infrastructure.Data
             builder.ToTable("Role");
             builder.HasKey(r => r.Id);
             builder.Property(r => r.Name).HasMaxLength(20);
-        }
-
-        private void ConfigureUserRole(EntityTypeBuilder<UserRole> builder)
-        {
-            builder.ToTable("UserRole");
-            builder.HasKey(ur => new {ur.UserId, ur.RoleId});
-            builder.HasOne(ur => ur.User).WithMany(ur => ur.UserRoles).HasForeignKey(ur => ur.UserId);
-            builder.HasOne(ur => ur.Role).WithMany(ur => ur.UserRoles).HasForeignKey(ur => ur.RoleId);
         }
 
         private void ConfigureMovieCast(EntityTypeBuilder<MovieCast> modelBuilder)

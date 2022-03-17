@@ -398,3 +398,54 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+DECLARE @var1 sysname;
+SELECT @var1 = [d].[name]
+FROM [sys].[default_constraints] [d]
+INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+WHERE ([d].[parent_object_id] = OBJECT_ID(N'[User]') AND [c].[name] = N'DateOfBirth');
+IF @var1 IS NOT NULL EXEC(N'ALTER TABLE [User] DROP CONSTRAINT [' + @var1 + '];');
+ALTER TABLE [User] ALTER COLUMN [DateOfBirth] datetime2(7) NOT NULL;
+ALTER TABLE [User] ADD DEFAULT '0001-01-01T00:00:00.0000000' FOR [DateOfBirth];
+GO
+
+DECLARE @var2 sysname;
+SELECT @var2 = [d].[name]
+FROM [sys].[default_constraints] [d]
+INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+WHERE ([d].[parent_object_id] = OBJECT_ID(N'[Purchase]') AND [c].[name] = N'PurchaseNumber');
+IF @var2 IS NOT NULL EXEC(N'ALTER TABLE [Purchase] DROP CONSTRAINT [' + @var2 + '];');
+ALTER TABLE [Purchase] ALTER COLUMN [PurchaseNumber] uniqueidentifier NULL;
+GO
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20220315043230_ReviewMigration', N'6.0.2');
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+ALTER TABLE [UserRole] DROP CONSTRAINT [PK_UserRole];
+GO
+
+DROP INDEX [IX_UserRole_RoleId] ON [UserRole];
+GO
+
+ALTER TABLE [UserRole] ADD CONSTRAINT [PK_UserRole] PRIMARY KEY ([RoleId], [UserId]);
+GO
+
+CREATE INDEX [IX_UserRole_UserId] ON [UserRole] ([UserId]);
+GO
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20220317044058_finalMigration', N'6.0.2');
+GO
+
+COMMIT;
+GO
+
