@@ -29,11 +29,6 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
 //
 builder.Services.AddHttpContextAccessor();
-
-// if conteollername ==home then for IMovieSefvife use MovieSegvie
-// if conterllnam= movies then for IMovieService ise MovieMockSevice
-
-// inject the connection string to our DbContext by reading from appsettings.json file
 builder.Services.AddDbContext<MovieShopDbContext>( options =>
 {
     options.UseSqlServer( builder.Configuration.GetConnectionString("MovieShopDbConnection"));

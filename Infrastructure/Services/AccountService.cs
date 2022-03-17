@@ -69,8 +69,12 @@ namespace Infrastructure.Services
             {
                 return new LoginResponseModel
                 {
-                    Email = user.Email, Id = user.Id, FirstName = user.FirstName, LastName = user.LastName,
-                    DateOfBirth = user.DateOfBirth
+                    Email = user.Email,
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    DateOfBirth = user.DateOfBirth,
+                    Roles = user.Roles.Select( r => new RoleModel { Id = r.Id, Name =r.Name}).ToList()
                 };
             }
             return null;
